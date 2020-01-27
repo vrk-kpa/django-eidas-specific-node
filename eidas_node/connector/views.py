@@ -232,7 +232,8 @@ class ConnectorResponseView(TemplateView):
                                                            CONNECTOR_SETTINGS.service_provider['request_issuer'],
                                                            CONNECTOR_SETTINGS.service_provider['endpoint'],
                                                            CONNECTOR_SETTINGS.service_provider['response_signature'],
-                                                           CONNECTOR_SETTINGS.service_provider['response_validity'])
+                                                           CONNECTOR_SETTINGS.service_provider['response_validity'],
+                                                           CONNECTOR_SETTINGS.service_provider['response_encryption'])
             LOGGER.debug('SAML Response: %s', self.saml_response)
         except EidasNodeError as e:
             LOGGER.exception('[#%r] Bad connector response: %s', self.log_id, e)
@@ -291,7 +292,8 @@ class ConnectorResponseView(TemplateView):
         return response
 
     def create_saml_response(self, issuer: str, audience: Optional[str], destination: Optional[str],
-                             signature_options: Optional[Dict[str, str]], validity: int) -> SAMLResponse:
+                             signature_options: Optional[Dict[str, str]], validity: int,
+                             encryption_options: Dict[str, Any] = None) -> SAMLResponse:
         """
         Create a SAML response from a light response.
 
@@ -299,8 +301,10 @@ class ConnectorResponseView(TemplateView):
         :param audience: The audience of the SAML response (the issuer of the SAML request).
         :param destination: Service provider's endpoint.
         :param signature_options: Optional options to create a signed response: `key_file`, `cert_file`.
-        `signature_method`, abd `digest_method`.
+        `signature_method`, and `digest_method`.
         :param validity: The validity of the response in minutes.
+        :param encryption_options: Optional options to encrypt an assertion: `cert_file`, `encryption_method`,
+        and `key_transport`.
         :return: A SAML response.
         """
         # Replace the original issuer with our issuer registered at the Identity Provider.
@@ -311,9 +315,20 @@ class ConnectorResponseView(TemplateView):
         LOGGER.info('[#%r] Created SAML response: id=%r, issuer=%r, in_response_to_id=%r',
                     self.log_id, response.id, response.issuer, response.in_response_to_id)
 
-        # TODO: encrypt the assertion (between response.sign_assertion and response.sign_response)
-        if signature_options and signature_options.get('key_file') and signature_options.get('cert_file'):
+        sign = signature_options and signature_options.get('key_file') and signature_options.get('cert_file')
+        encrypt = encryption_options and encryption_options.get('cert_file')
+
+        if sign:
+            assert signature_options
             response.sign_assertion(**signature_options)
+        if encrypt:
+            assert encryption_options
+            response.encrypt_assertion(
+                encryption_options['cert_file'],
+                encryption_options['encryption_method'],
+                encryption_options['key_transport'])
+        if sign:
+            assert signature_options
             response.sign_response(**signature_options)
         return response
 
