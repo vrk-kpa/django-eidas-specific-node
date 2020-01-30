@@ -16,7 +16,8 @@ from eidas_node.xml import (XML_SIG_NAMESPACE, XmlKeyInfo, create_xml_uuid, decr
                             remove_newlines_in_xml_text, sign_xml_node, verify_xml_signatures)
 
 # This is an ugly hack but only for unit tests...
-LIBXML_VERSION = tuple(map(int, re.search(r'\((\d+)\.(\d+)\.(\d+)\)', xmlsec.__doc__).groups()))  # type: ignore
+# TODO: Remove when we drop support for libxmlsec1 < 1.2.27
+LIBXMLSEC_VERSION = tuple(map(int, re.search(r'\((\d+)\.(\d+)\.(\d+)\)', xmlsec.__doc__).groups()))  # type: ignore
 
 
 class TestGetElementPath(SimpleTestCase):
@@ -289,7 +290,7 @@ class TestVerifyXMLSignatures(SimpleTestCase):
 class TestEncryptXMLNode(SimpleTestCase):
     def test_encrypt_xml_node(self):
         supported_ciphers = set(XmlBlockCipher)  # type: Set[XmlBlockCipher]
-        if LIBXML_VERSION < (1, 2, 27):  # pragma: no cover
+        if LIBXMLSEC_VERSION < (1, 2, 27):  # pragma: no cover
             supported_ciphers -= {XmlBlockCipher.AES128_GCM, XmlBlockCipher.AES192_GCM, XmlBlockCipher.AES256_GCM}
 
         for cipher in supported_ciphers:
