@@ -145,7 +145,11 @@ def encrypt_xml_node(node: Element, cert_file: str, cipher: XmlBlockCipher, key_
     manager.add_key(xmlsec.Key.from_file(cert_file, xmlsec.KeyFormat.CERT_PEM))
     ctx = xmlsec.EncryptionContext(manager)
     ctx.key = xmlsec.Key.generate(key_type, key_length, xmlsec.KeyDataType.SESSION)
-    ctx.encrypt_xml(enc_data, node)
+
+    try:
+        ctx.encrypt_xml(enc_data, node)
+    except xmlsec.Error:
+        raise SecurityError('XML encryption failed. Invalid certificate, invalid or unsupported encryption method.')
 
     # xmlsec library adds unnecessary tail newlines again, so we remove them.
     remove_extra_xml_whitespace(enc_data)

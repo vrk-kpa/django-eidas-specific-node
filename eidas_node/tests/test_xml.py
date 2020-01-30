@@ -11,7 +11,7 @@ from eidas_node.constants import XmlBlockCipher, XmlKeyTransport
 from eidas_node.errors import SecurityError
 from eidas_node.saml import EIDAS_NAMESPACES, Q_NAMES
 from eidas_node.tests.constants import CERT_FILE, DATA_DIR, KEY_FILE, NIA_CERT_FILE, SIGNATURE_OPTIONS, WRONG_KEY_FILE
-from eidas_node.xml import (XML_SIG_NAMESPACE, create_xml_uuid, decrypt_xml, dump_xml, encrypt_xml_node,
+from eidas_node.xml import (XML_SIG_NAMESPACE, XmlKeyInfo, create_xml_uuid, decrypt_xml, dump_xml, encrypt_xml_node,
                             get_element_path, is_xml_id_valid, parse_xml, remove_extra_xml_whitespace,
                             remove_newlines_in_xml_text, sign_xml_node, verify_xml_signatures)
 
@@ -313,3 +313,10 @@ class TestEncryptXMLNode(SimpleTestCase):
             self.assertEqual(decrypt_xml(document, KEY_FILE), 1)
             decrypted = dump_xml(document).decode()
             self.assertEqual(original, decrypted)
+
+    @patch.dict('eidas_node.xml.XML_KEY_INFO', {XmlBlockCipher.TRIPLEDES_CBC: XmlKeyInfo(xmlsec.KeyData.AES, 192)})
+    def test_encrypt_xml_node_failure_wrong_key_type(self):
+        root = Element('root')
+        data = SubElement(root, 'data')
+        with self.assertRaisesMessage(SecurityError, 'Invalid certificate, invalid or unsupported encryption method'):
+            encrypt_xml_node(data, CERT_FILE, XmlBlockCipher.TRIPLEDES_CBC, XmlKeyTransport.RSA_OAEP_MGF1P)
