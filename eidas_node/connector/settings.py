@@ -1,6 +1,6 @@
 """Settings of eidas_node.connector."""
 
-from appsettings import AppSettings, DictSetting, IterableSetting, NestedSetting, PositiveIntegerSetting, StringSetting
+from appsettings import AppSettings, DictSetting, IterableSetting, NestedSetting, PositiveIntegerSetting, StringSetting, BooleanSetting
 from django.core.exceptions import ImproperlyConfigured
 
 from eidas_node.attributes import ATTRIBUTE_MAP
@@ -79,6 +79,12 @@ class ConnectorSettings(AppSettings):
                 cert_file=StringSetting(min_length=1),
                 encryption_method=EnumSetting(XmlBlockCipher, default='AES256_GCM'),
                 key_transport=EnumSetting(XmlKeyTransport, default='RSA_OAEP_MGF1P'),
+        response_kms_signature=NestedSetting(
+            settings=dict(
+                kms_enabled=BooleanSetting(default=False),
+                kms_key_alias=StringSetting(min_length=1),
+                cert_file=StringSetting(min_length=1),
+                signature_method=StringSetting(default='RSASSA_PKCS1_V1_5_SHA_512', min_length=1),
             )),
         response_validity=PositiveIntegerSetting(default=10),
         country_parameter=StringSetting(default='country', min_length=1),

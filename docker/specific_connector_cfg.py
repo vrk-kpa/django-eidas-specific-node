@@ -62,6 +62,11 @@ CONNECTOR_SERVICE_PROVIDER = {
         'KEY_FILE': KEY_FILE,
         'CERT_FILE': CERT_FILE,
     },
+    'RESPONSE_KMS_SIGNATURE': {
+        'KMS_ENABLED': bool(False),        
+        'KMS_KEY_ALIAS': '',
+        'CERT_FILE': '',
+    },
 }  # type: Dict[str, str]
 
 CONNECTOR_LIGHT_STORAGE = {

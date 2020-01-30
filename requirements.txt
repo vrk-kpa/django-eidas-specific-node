@@ -2,3 +2,4 @@ django >=2.2,<2.3
 django-app-settings >=0.5
 lxml
 xmlsec
+boto3==1.11.6

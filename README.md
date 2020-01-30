@@ -222,7 +222,12 @@ A dictionary with following items:
     [XML key transport method](https://www.w3.org/TR/xmlenc-core1/#sec-Alg-KeyTransport).
     `RSA` (RSA Version 1.5) and `RSA_OAEP_MGF1P` (RSA-OAEP with MGF1-SHA1 as a mask generation function) are supported.
 * `RESPONSE_VALIDITY` (int, optional, default 10): The validity of the SAML response in minutes.
-
+*  RESPONSE_KMS_SIGNATURE (required): AWS KMS configurations
+  *  KMS_ENABLED  (optional, boolean, default False) Using KMS also requires credentials to be provided for boto3 client. More about how to provide credentials here https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html
+  *  KMS_KEY_ALIAS (required if KMS_ENABLED is True)  key alias from AWS KMS. (for example. alias/testkey),
+  *  CERT_FILE  (required if KMS_ENABLED is True) certificate for the key in AWS KMS,
+  *  SIGNATURE_METHOD (optional, default RSASSA_PKCS1_V1_5_SHA_512) Signature method for AWS KMS. 
+   
 #### `CONNECTOR_EIDAS_NODE`
 
 Settings for **the interaction with eIDAS Node**.
