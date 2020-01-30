@@ -3,7 +3,7 @@ import hmac
 import logging
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.template.loader import select_template
@@ -316,20 +316,15 @@ class ConnectorResponseView(TemplateView):
                     self.log_id, response.id, response.issuer, response.in_response_to_id)
 
         sign = signature_options and signature_options.get('key_file') and signature_options.get('cert_file')
-        encrypt = encryption_options and encryption_options.get('cert_file')
-
         if sign:
-            assert signature_options
-            response.sign_assertion(**signature_options)
-        if encrypt:
-            assert encryption_options
+            response.sign_assertion(**cast(Dict[str, Any], signature_options))
+        if encryption_options and encryption_options.get('cert_file'):
             response.encrypt_assertion(
                 encryption_options['cert_file'],
                 encryption_options['encryption_method'],
                 encryption_options['key_transport'])
         if sign:
-            assert signature_options
-            response.sign_response(**signature_options)
+            response.sign_response(**cast(Dict[str, Any], signature_options))
         return response
 
     def get_context_data(self, **kwargs) -> dict:
