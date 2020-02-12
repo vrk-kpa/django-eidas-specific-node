@@ -316,8 +316,8 @@ class ConnectorResponseView(TemplateView):
                     self.log_id, response.id, response.issuer, response.in_response_to_id)
 
         sign = signature_options and signature_options.get('key_file') and signature_options.get('cert_file')
-        if sign:
-            response.sign_assertion(**cast(Dict[str, Any], signature_options))
+        #if sign:
+            #response.sign_assertion(**cast(Dict[str, Any], signature_options))
         if encryption_options and encryption_options.get('cert_file'):
             response.encrypt_assertion(
                 encryption_options['cert_file'],
